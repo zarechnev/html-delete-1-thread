@@ -11,39 +11,39 @@
 using namespace std;
 
 struct Params {
-	vector<string> *dataArray; // указатель на фрагмент массива
-	int count, indexThread; // длина массива и индекс потока
-	vector<string> *ans; // указатель на массив ответов
+	vector<string> *dataArray; // parh of mass
+	int count, indexThread; // parh of mass length, thread index
+	vector<string> *ansArray; // ans mass
 };
 
 DWORD WINAPI thread_func(void *p) {
 	vector<string> *data = ((Params *)p)->dataArray;
-	int lenth = ((Params *)p)->count;
+	int massLength = ((Params *)p)->count;
+	vector<string> *ans = ((Params *)p)->ansArray;
+
+	for (int i = 0; i = massLength; i++) {
+		ans[i] = data[i];
+	}
 	
-	vector<string> *ans = ((Params *)p)->ans;
-
-	ans = data;
-
 	delete(p);
 	return 0;
 	}
 
 DWORD main(DWORD argc, char* argv[]) {
-	setlocale(LC_ALL, "rus");
 	ifstream html_file;
 	int thread_count;
 
 	if (argc > 1) {
 		html_file.open(argv[1]);
 		if (!html_file.is_open()) {
-			cout << "‘айл не может быть открыт." << endl;
+			cout << "HTML file can not be opened." << endl;
 			return -1;
 		}
 		if (argv[2]) thread_count = int(argv[2]);
 		else thread_count = 2;
 	}
 	else {
-		cout << "”кажите html файл и количество потоков в качестве параметров." << endl;
+		cout << "Enter HTML file, please." << endl;
 		system("pause");
 		return -2;
 	}
@@ -59,14 +59,17 @@ DWORD main(DWORD argc, char* argv[]) {
 
 	cout << arr.size();
 
-	HANDLE *threadProducer = new HANDLE[thread_count]; // потоки
+	HANDLE *threadProducer = new HANDLE[thread_count]; // threads
 	DWORD *pdwThreadId = new DWORD[thread_count];
 
 	vector<string> *ans = new vector<string>[thread_count];
-
-
+	
 	for (int k = 1; k < thread_count; k++) {
 		Params *thread_args = new Params;
+
+		vector<string> * temp;
+		cout << &arr[3];
+
 		thread_args->dataArray = &arr[k*(arr.size() / thread_count)];
 		if (k < thread_count - 1) thread_args->count = arr.size() / thread_count;
 		else thread_args->count = arr.size() - (arr.size() / thread_count) * k;
