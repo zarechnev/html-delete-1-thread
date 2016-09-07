@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include <windows.h>
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <clocale>
@@ -38,6 +39,7 @@ DWORD WINAPI thread_func(void *p) {
 }
 
 int main(int argc, char* argv[]) {
+	int t = clock();
 	ifstream html_file;
 	ofstream out_file;
 	unsigned int thread_count;
@@ -48,7 +50,9 @@ int main(int argc, char* argv[]) {
 			cout << "HTML file can not be opened." << endl;
 			return -1;
 		}
-		if (argv[2]) thread_count = unsigned int(argv[2]);
+		if (argc > 2) {
+			thread_count = stoi(argv[2]);
+		}
 		else thread_count = 2;
 	}
 	else {
@@ -65,6 +69,7 @@ int main(int argc, char* argv[]) {
 		getline(html_file, str);
 		arr.push_back(str);
 	}
+	cout << clock() - t << " - arr created." << endl;
 
 	//threads_count <= strings in file
 	if (thread_count > arr.size()) thread_count = arr.size();
@@ -90,6 +95,8 @@ int main(int argc, char* argv[]) {
 		
 	html_file.close();
 	out_file.close();
+
+	cout << clock() - t << " - exit." << endl;
 
 	return 0;
 }
