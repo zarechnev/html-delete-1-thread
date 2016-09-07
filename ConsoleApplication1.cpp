@@ -10,46 +10,57 @@
 
 using namespace std;
 
+vector<string> arr; // mass of html file
+
 struct Params {
-	vector<string> *dataArray; // parh of mass
-	int count, indexThread; // parh of mass length, thread index
-	vector<string> *ansArray; // ans mass
+	unsigned int f_index, count; // first index and index counts
 };
 
 DWORD WINAPI thread_func(void *p) {
-	vector<string> *data = ((Params *)p)->dataArray;
-	int massLength = ((Params *)p)->count;
-	vector<string> *ans = ((Params *)p)->ansArray;
+	unsigned int first_index = ((Params *)p)->f_index;
+	unsigned int index_counts = ((Params *)p)->count;
+	for (unsigned int k = first_index; k < first_index + index_counts; k++) {
 
-	for (int i = 0; i = massLength; i++) {
-		ans[i] = data[i];
-	}
-	
-	delete(p);
-	return 0;
-	}
+		//cycle_BEGIN
+		string text = "";
+		char ch = '\0';
+		bool b = false;
 
-DWORD main(DWORD argc, char* argv[]) {
-	ifstream html_file;
-	int thread_count;
-
-	if (argc > 1) {
-		html_file.open(argv[1]);
-		if (!html_file.is_open()) {
-			cout << "HTML file can not be opened." << endl;
-			return -1;
+		for (unsigned int i = 0; i < arr[k].length(); i++) {
+			if (ch == '>') b = true;
+			if (b) {
+				if (ch != '<' && ch != '>') text += ch;
+			}
+			if (ch == '<') b = false;
 		}
-		if (argv[2]) thread_count = int(argv[2]);
-		else thread_count = 2;
+		arr[k] = text;
+		//cycle_END
 	}
-	else {
-		cout << "Enter HTML file, please." << endl;
-		system("pause");
-		return -2;
-	}
+
+	return 0;
+}
+
+int main(int argc, char* argv[]) {
+	ifstream html_file("F:\\vs\\лр_1-многопоточ\\html-delete-multythread\\Debug\\1.txt");
+	unsigned int thread_count = 2;
 	
-	vector<string> arr;
+	//if (argc > 1) {
+	//	html_file.open(argv[1]);
+	//	if (!html_file.is_open()) {
+	//		cout << "HTML file can not be opened." << endl;
+	//		return -1;
+	//	}
+	//	if (argv[2]) thread_count = int(argv[2]);
+	//	else thread_count = 2;
+	//}
+	//else {
+	//	cout << "Enter HTML file, please." << endl;
+	//	system("pause");
+	//	return -2;
+	//}
+	
 	string str;
+
 	ofstream out_file("out.txt");
 
 	while (!html_file.eof()) {
@@ -57,27 +68,30 @@ DWORD main(DWORD argc, char* argv[]) {
 		arr.push_back(str);
 	}
 
-	cout << arr.size();
-
+	//threads_count <= strings in file
+	if (thread_count > arr.size()) thread_count = arr.size();
+	
 	HANDLE *threadProducer = new HANDLE[thread_count]; // threads
-	DWORD *pdwThreadId = new DWORD[thread_count];
+	Params *thread_args = new Params[thread_count]; // thread params
 
-	vector<string> *ans = new vector<string>[thread_count];
-	
-	for (int k = 1; k < thread_count; k++) {
-		Params *thread_args = new Params;
-
-		vector<string> * temp;
-		cout << &arr[3];
-
-		thread_args->dataArray = &arr[k*(arr.size() / thread_count)];
-		if (k < thread_count - 1) thread_args->count = arr.size() / thread_count;
-		else thread_args->count = arr.size() - (arr.size() / thread_count) * k;
-		thread_args->indexThread = k;
-
-		threadProducer[k] = CreateThread(0, 0, &thread_func, (void *)thread_args, 0, &pdwThreadId[k]);
+	for (unsigned int k = 0; k < thread_count; k++) {
+		//cout << "thread" << endl;
+		int count_el_one_thr = arr.size() / thread_count;
+		//first element index
+		thread_args[k].f_index = k * count_el_one_thr;
+		//elements count
+		thread_args[k].count = count_el_one_thr;
+		threadProducer[k] = CreateThread(0, 0, &thread_func, &thread_args[k], 0, 0);
 	}
-	
+
+	WaitForMultipleObjects(thread_count, threadProducer, true, INFINITE);
+
+	system("pause");
+
+	for (unsigned int i = 0; i < arr.size(); i++) {
+		out_file << arr[i] << endl;
+	}
+		
 	html_file.close();
 	out_file.close();
 
