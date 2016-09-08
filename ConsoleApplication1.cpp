@@ -15,6 +15,7 @@ vector<string> arr;
 
 struct Params {
 	unsigned int f_index, count;
+	vector<string> *thr_index_addr;
 };
 
 DWORD WINAPI thread_func(void *p) {
@@ -42,7 +43,7 @@ int main(int argc, char* argv[]) {
 	int t = clock();
 	ifstream html_file;
 	ofstream out_file;
-	unsigned int thread_count;
+	unsigned int thread_count=2;
 	
 	if (argc > 1) {
 		html_file.open(argv[1]);
@@ -50,15 +51,18 @@ int main(int argc, char* argv[]) {
 			cout << "HTML file can not be opened." << endl;
 			return -1;
 		}
-		if (argc > 2) {
-			thread_count = stoi(argv[2]);
-		}
+		if (argc > 2) thread_count = stoi(argv[2]);
 		else thread_count = 2;
 	}
+	
 	else {
-		cout << "Enter HTML file, please." << endl;
-		system("pause");
-		return -2;
+		html_file.open("in.txt");
+		if (!html_file.is_open()) {
+			cout << "HTML file can not be opened." << endl;
+			cout << "Enter HTML file, please." << endl;
+			system("pause");
+			return -2;
+		}		
 	}
 	
 	out_file.open("out.txt", ios::trunc);
@@ -77,26 +81,38 @@ int main(int argc, char* argv[]) {
 	HANDLE *threadProducer = new HANDLE[thread_count]; // threads
 	Params *thread_args = new Params[thread_count]; // thread params
 
+	vector<string> *ans = new vector<string>[thread_count]; //ans vector of strings
+
 	for (unsigned int k = 0; k < thread_count; k++) {
 		//cout << "thread" << endl;
 		unsigned int count_el_one_thr = arr.size() / thread_count;
 		//first element index
 		thread_args[k].f_index = k * count_el_one_thr;
 		//elements count
+		thread_args[k].thr_index_addr = &ans[k];
 		thread_args[k].count = (count_el_one_thr < (arr.size() - count_el_one_thr * k) ? count_el_one_thr : (arr.size() - count_el_one_thr * k));
 		threadProducer[k] = CreateThread(0, 0, &thread_func, &thread_args[k], 0, 0);
 	}
 
 	WaitForMultipleObjects(thread_count, threadProducer, true, INFINITE);
 
-	for (unsigned int i = 0; i < arr.size(); i++) {
-		out_file << arr[i] << endl;
+	for (unsigned int i = 0; i < thread_count; i++) {
+		for (unsigned int k = 0; k < ans[i].size(); k ++)
+				out_file << ans[i][k] << endl;
 	}
+
+	//for (unsigned int i = 0; i < arr.size(); i++) {
+	//	out_file << arr[i] << endl;
+	//}
 		
 	html_file.close();
 	out_file.close();
 
 	cout << clock() - t << " - exit." << endl;
+
+	cout << "threads count: " << thread_count << endl;
+
+	system("pause");
 
 	return 0;
 }
