@@ -41,7 +41,7 @@ DWORD WINAPI thread_func(void *p) {
 }
 
 int main(int argc, char* argv[]) {
-	int t = clock();
+	int start_time = clock();
 	ifstream html_file;
 	ofstream out_file;
 	unsigned int thread_count=2;
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
 		return -2;
 	}
 	
-	out_file.open("out.txt", ios::trunc);
+	out_file.open("out_multy.txt", ios::trunc);
 
 	while (!html_file.eof()) {
 		getline(html_file, str_tmp);
@@ -90,16 +90,9 @@ int main(int argc, char* argv[]) {
 	html_file.close();
 	out_file.close();
 
-	cout << clock() - t << " - exit." << endl;
-
-	cout << "threads count: " << thread_count << endl;
-
-	system("pause");
-
-	arr.clear();
-	for (unsigned int i = 0; i < ans[i].size(); i++) ans[i].clear();
-
-	system("pause");
+	int algorithm_end_time = clock();
+	cout << "Algorithm completed in: " << (algorithm_end_time - start_time) / 1000.0 << " seconds." << endl;
+	cout << "Threads count: " << thread_count << endl;
 
 	return 0;
 }
